@@ -320,6 +320,7 @@ namespace PROProtocol
             {
                 int num = Tiles2[x, y];
                 int num2 = Tiles3[x, y];
+                bool hasLink = HasLink(x, y);
                 return (num == 6 || num == 14 || num == 55 || num == 15 || num == 248 || num == 249 || num == 250 || num2 == 6 || num2 == 14 || num2 == 55 || num2 == 15 || num2 == 248 || num2 == 249 || num2 == 250);
             }
             return false;

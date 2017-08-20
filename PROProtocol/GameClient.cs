@@ -92,6 +92,18 @@ namespace PROProtocol
         public event Action<Shop> ShopOpened;
         public event Action<List<Pokemon>> PCBoxUpdated;
 
+        #region Trading Variables
+        public event Action<string> TradeRequested;
+        public event Action TradeCanceled;
+        public event Action TradeAccepted;
+        public event Action<string[]> TradeMoneyUpdated;
+        public event Action TradePokemonUpdated;
+        public event Action<string[]> TradeStatusUpdated;
+        public event Action TradeStatusReset;
+        public List<TradePokemon> First_Trade;
+        public List<TradePokemon> Second_Trade;
+        #endregion
+
         private const string Version = "0.97";
 
         private GameConnection _connection;
@@ -177,6 +189,8 @@ namespace PROProtocol
             Players = new Dictionary<string, PlayerInfos>();
             PCGreatestUid = -1;
             IsPrivateMessageOn = true;
+            First_Trade = new List<TradePokemon>();
+            Second_Trade = new List<TradePokemon>();
         }
 
         public void Open()
@@ -1104,6 +1118,28 @@ namespace PROProtocol
                 case "m":
                     OnPCBox(data);
                     break;
+                #region Trade actions
+                case "mb":
+                    // Actions : Trades requests, Friends requests..
+                    HandleActions(data);
+                    break;
+                case "t":
+                    // Trade Start
+                    HandleTrade(data);
+                    break;
+                case "tu":
+                    OnTradeUpdate(data);
+                    break;
+                case "ta":
+                    UselessTradeFeature(); // Send a "change to final screen" order to client. Useless.
+                    break;
+                case "tb":
+                    OnTradeStatusChange(data);
+                    break;
+                case "tc":
+                    OnTradeStatusReset();
+                    break;
+                #endregion
                 default:
 #if DEBUG
                     Console.WriteLine(" ^ unhandled /!\\");
@@ -1873,5 +1909,86 @@ namespace PROProtocol
             _mapClient.DownloadMap(MapName);
             Players.Clear();
         }
+
+        #region Trade functions
+        private void HandleActions(string[] data)
+        {
+            string action = (data[1].Split('|'))[3];
+            if (action.Contains("/trade")) {
+                OnTradeRequest(data);
+            }
+            else
+            {
+                // Known : Friend request.
+                // Others : ??? Maybe guilde invites, etc.
+            }
+        }
+
+        private void OnTradeRequest(string[] data )
+        {
+            string applicant = (data[1].Split('|'))[3].Replace("/trade ", ""); // Basically getting exchange applicant.
+            TradeRequested?.Invoke(applicant);
+        }
+
+        private void HandleTrade(string[] data)
+        {
+            string[] tdata = data[1].Split('|');
+            string type = tdata[0];
+            if (type == "c")
+            {
+                TradeCanceled?.Invoke();
+            } 
+            else
+            {
+                TradeMoneyUpdated?.Invoke(tdata);
+                Console.WriteLine(tdata[0] + '|' + tdata[1] + '|' // First exhcnager
+                 + tdata[2] + '|' // Second
+                 + tdata[3] + '|' // First money on exhcnage
+                 + tdata[4] + '|'); // Second money on exchange0
+            }
+        }
+
+        private void OnTradeUpdate(string[] data)
+        {
+            string[] teamData = data[1].Split('|');
+            int UID = 0;
+            First_Trade.Clear();
+            Second_Trade.Clear();
+            List <TradePokemon>  tradeList = new List<TradePokemon>();
+            foreach (string pokemon in teamData)
+            {
+                UID++;
+                if (pokemon == string.Empty)
+                    continue;
+
+                string[] pokemonData = pokemon.Split(',');
+                if (UID <= 6)
+                {
+                    First_Trade.Add(new TradePokemon(pokemonData));
+                }
+                else
+                {
+                    Second_Trade.Add(new TradePokemon(pokemonData));
+                }
+            }
+            TradePokemonUpdated?.Invoke();
+        }
+
+        private void OnTradeStatusChange(string[] data)
+        {
+            TradeStatusUpdated?.Invoke(data);
+        }
+
+        // Send a "change to final screen" order to client. Useless.
+        private void UselessTradeFeature()
+        {
+            TradeAccepted?.Invoke();
+        }
+
+        private void OnTradeStatusReset()
+        {
+            TradeStatusReset?.Invoke();
+        }
+        #endregion
     }
 }
