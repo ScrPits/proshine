@@ -33,6 +33,7 @@ namespace PROProtocol
 
         public int Money { get; private set; }
         public int Coins { get; private set; }
+        public bool IsMember { get; private set; }
         public List<Pokemon> Team { get; private set; }
         public List<Pokemon> CurrentPCBox { get; private set; }
         public List<InventoryItem> Items { get; private set; }
@@ -104,7 +105,7 @@ namespace PROProtocol
         public List<TradePokemon> Second_Trade;
         #endregion
 
-        private const string Version = "0.97";
+        private const string Version = "Sinnoh";
 
         private GameConnection _connection;
         private DateTime _lastMovement;
@@ -973,7 +974,7 @@ namespace PROProtocol
             OpenedShop = null;
             IsPCOpen = false;
             // DSSock.sendMove
-            SendPacket("#|.|" + direction);
+            SendPacket("/|.|" + direction);
         }
 
         private void SendAttack(string number)
@@ -1243,6 +1244,7 @@ namespace PROProtocol
             PokedexOwned = Convert.ToInt32(playerData[4]);
             PokedexSeen = Convert.ToInt32(playerData[5]);
             PokedexEvolved = Convert.ToInt32(playerData[6]);
+            IsMember = playerData[10] == "1";
         }
 
         private void OnUpdateTime(string[] data)
