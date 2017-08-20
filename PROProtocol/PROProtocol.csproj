@@ -59,7 +59,6 @@
     <Compile Include="PokemonMove.cs" />
     <Compile Include="PokemonNamesManager.cs" />
     <Compile Include="PokemonNature.cs" />
-    <Compile Include="PokemonSpawn.cs" />
     <Compile Include="PokemonStats.cs" />
     <Compile Include="PokemonType.cs" />
     <Compile Include="Region.cs" />
