@@ -1,0 +1,14 @@
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\InputDialog.exe.config
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\InputDialog.exe
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\InputDialog.pdb
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\Xceed.Wpf.ListBox.dll
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\Xceed.Wpf.Toolkit.dll
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\Xceed.Wpf.ListBox.xml
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\bin\Debug\Xceed.Wpf.Toolkit.xml
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.csprojResolveAssemblyReference.cache
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.InputDialog.resources
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.Properties.Resources.resources
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.csproj.GenerateResource.Cache
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.csproj.CoreCompileInputs.cache
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.exe
+C:\Users\Derex\Downloads\proshine-Proshine-Added-InputDialog(2)\proshine-Proshine-Added-InputDialog\InputDialog\obj\Debug\InputDialog.pdb
