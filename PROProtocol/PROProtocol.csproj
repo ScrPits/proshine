@@ -31,6 +31,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
@@ -59,6 +60,7 @@
     <Compile Include="PokemonMove.cs" />
     <Compile Include="PokemonNamesManager.cs" />
     <Compile Include="PokemonNature.cs" />
+    <Compile Include="PokemonSpawn.cs" />
     <Compile Include="PokemonStats.cs" />
     <Compile Include="PokemonType.cs" />
     <Compile Include="Region.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="ShopItem.cs" />
     <Compile Include="StatType.cs" />
     <Compile Include="Timeout.cs" />
+    <Compile Include="TradePokemon.cs" />
     <Compile Include="TypesManager.cs" />
     <Compile Include="XorEncryption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
