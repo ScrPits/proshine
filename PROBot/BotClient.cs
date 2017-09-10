@@ -26,6 +26,8 @@ namespace PROBot
         public State Running { get; private set; }
         public bool IsPaused { get; private set; }
 
+        
+
         public event Action<State> StateChanged;
         public event Action<string> MessageLogged;
         public event Action ClientChanged;
@@ -40,6 +42,7 @@ namespace PROBot
         public MoveTeacher MoveTeacher { get; private set; }
         public StaffAvoider StaffAvoider { get; private set; }
         public AutoReconnector AutoReconnector { get; private set; }
+        public IsTrainerBattlesActive IsTrainerBattlesActive { get; private set; }
         public MovementResynchronizer MovementResynchronizer { get; private set; }
         public Dictionary<int, OptionSlider> SliderOptions { get; set; }
         public Dictionary<int, TextOption> TextOptions { get; set; }
@@ -55,12 +58,37 @@ namespace PROBot
             MoveTeacher = new MoveTeacher(this);
             StaffAvoider = new StaffAvoider(this);
             AutoReconnector = new AutoReconnector(this);
+            IsTrainerBattlesActive = new IsTrainerBattlesActive(this);
             MovementResynchronizer = new MovementResynchronizer(this);
             Rand = new Random();
             SliderOptions = new Dictionary<int, OptionSlider>();
             TextOptions = new Dictionary<int, TextOption>();
         }
+        public void CancelInvokes()
+        {
+            if (Script != null)
+                foreach (Invoker invoker in Script.Invokes)
+                    invoker.Called = true;
+        }
+        
+        public void CallInvokes()
+        {
+            if (Script != null)
+            {
+                for (int i = Script.Invokes.Count - 1; i >= 0; i--)
+                {
+                    if (Script.Invokes[i].Time < DateTime.UtcNow)
+                    {
+                        if (Script.Invokes[i].Called)
+                            Script.Invokes.RemoveAt(i);
+                        else
+                            Script.Invokes[i].Call();
+                    }
+                }
+            }
+        }
 
+        
         public void RemoveText(int index)
         {
             TextboxRemoved?.Invoke(TextOptions[index]);
@@ -116,7 +144,7 @@ namespace PROBot
             Game = client;
             AI = null;
             Stop();
-
+            
             if (client != null)
             {
                 AI = new BattleAI(client);
@@ -129,6 +157,7 @@ namespace PROBot
                 client.TeleportationOccuring += Client_TeleportationOccuring;
             }
             ClientChanged?.Invoke();
+            
         }
 
         public void Login(Account account)
@@ -166,8 +195,10 @@ namespace PROBot
 
         public void Update()
         {
+            if (Script != null)
+            Script.Update();
+            CallInvokes();
             AutoReconnector.Update();
-
             if (_loginRequested)
             {
                 LoginUpdate();
@@ -179,7 +210,6 @@ namespace PROBot
             {
                 return;
             }
-            
             if (PokemonEvolver.Update()) return;
             if (MoveTeacher.Update()) return;
 
@@ -221,6 +251,9 @@ namespace PROBot
 
         public void Stop()
         {
+            if (Game != null)
+                Game.ClearPath();
+            
             if (Running != State.Stopped)
             {
                 Running = State.Stopped;

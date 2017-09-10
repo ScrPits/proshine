@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PROBot.Scripting
 {
@@ -15,6 +16,7 @@ namespace PROBot.Scripting
         public virtual void Stop() { }
         public virtual void Pause() { }
         public virtual void Resume() { }
+        public virtual void Update() { }
 
         public virtual void OnDialogMessage(string message) { }
         public virtual void OnBattleMessage(string message) { }
@@ -23,6 +25,8 @@ namespace PROBot.Scripting
         public virtual void OnLearningMove(string moveName, int pokemonIndex) { }
 
         public abstract bool ExecuteNextAction();
+        
+        public List<Invoker> Invokes = new List<Invoker>();
 
         protected void LogMessage(string message)
         {

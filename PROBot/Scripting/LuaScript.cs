@@ -17,7 +17,7 @@ namespace PROBot.Scripting
 #if DEBUG
         public int TimeoutDelay = 60000;
 #else
-        public int TimeoutDelay = 3000;
+        public int TimeoutDelay = 40000;
 #endif
 
         private Script _lua;
@@ -63,6 +63,11 @@ namespace PROBot.Scripting
         public override void Resume()
         {
             CallFunctionSafe("onResume");
+        }
+	
+	 public override void Update()
+        {
+            CallFunctionSafe("onUpdate");
         }
 
         public override void OnDialogMessage(string message)
@@ -196,6 +201,7 @@ namespace PROBot.Scripting
             _lua.Globals["isNight"] = new Func<bool>(IsNight);
             _lua.Globals["isOutside"] = new Func<bool>(IsOutside);
             _lua.Globals["isAutoEvolve"] = new Func<bool>(IsAutoEvolve);
+            _lua.Globals["isTeamInspectionEnabled"] = new Func<bool>(IsTeamInspectionEnabled);
 
             _lua.Globals["isCurrentPCBoxRefreshed"] = new Func<bool>(IsCurrentPCBoxRefreshed);
             _lua.Globals["getCurrentPCBoxId"] = new Func<int>(GetCurrentPCBoxId);
@@ -287,6 +293,10 @@ namespace PROBot.Scripting
             _lua.Globals["disablePrivateMessage"] = new Func<bool>(DisablePrivateMessage);
             _lua.Globals["enableAutoEvolve"] = new Func<bool>(EnableAutoEvolve);
             _lua.Globals["disableAutoEvolve"] = new Func<bool>(DisableAutoEvolve);
+            _lua.Globals["enableTrainerBattles"] = new Func<bool>(EnableTrainerBattles);
+            _lua.Globals["disableTrainerBattles"] = new Func<bool>(DisableTrainerBattles);
+            _lua.Globals["disableTeamInspection"] = new Func<bool>(DisableTeamInspection);
+            _lua.Globals["enableTeamInspection"] = new Func<bool>(EnableTeamInspection);
 
             // Path functions
             _lua.Globals["pushDialogAnswer"] = new Action<DynValue>(PushDialogAnswer);
@@ -325,7 +335,17 @@ namespace PROBot.Scripting
             // File editing actions
             _lua.Globals["logToFile"] = new Action<string, DynValue, bool>(LogToFile);
             _lua.Globals["readLinesFromFile"] = new Func<string, string[]>(ReadLinesFromFile);
+	        _lua.Globals["getInputDialog"] = new Func<string[], string>(GetInputDialog);
 
+            // Taos
+            _lua.Globals["getSpawnList"] = new Func<List<Dictionary<string, object>>>(GetSpawnList);
+            
+            _lua.Globals["login"] = new Action<string, string, string, int, string, int, string, string>(Login);
+            _lua.Globals["relog"] = new Action<float, string>(Relog);
+            _lua.Globals["startScript"] = new Func<bool>(StartScript);
+            _lua.Globals["invoke"] = new Action<DynValue, float, DynValue[]>(Invoke);
+            _lua.Globals["cancelInvokes"] = new Action(CancelInvokes);
+		
             foreach (string content in _libsContent)
             {
                 CallContent(content);
@@ -435,6 +455,7 @@ namespace PROBot.Scripting
         {
             LogMessage(message);
             Bot.Stop();
+            Bot.CancelInvokes();
         }
 
         // API: Displays the specified message to the message log and logs out.
@@ -472,6 +493,31 @@ namespace PROBot.Scripting
             }
             return digSpots;
         }
+
+        // API return an array of all known pokémons with their properties on the current map.
+        /* format : {index = {  "name" = string name,
+*                      "caught" = boolean caught,
+*                     "member" = boolean member,
+*                      "surf" = boolean surf,
+*                      "fish" = boolean fish,
+*                      "hitem = boolean hitem}}
+*/
+        private List<Dictionary<string, object>> GetSpawnList()
+       {
+            var spawnList = new List<Dictionary<string, object>>();
+            foreach (PokemonSpawn pkmspwn in Bot.Game.SpawnList)
+            {
+                var spawnData = new Dictionary<string, object>();
+                spawnData["name"] = pkmspwn.name;
+                spawnData["caught"] = pkmspwn.captured;
+                spawnData["surf"] = pkmspwn.surf;
+                spawnData["member"] = pkmspwn.msonly;
+                spawnData["fish"] = pkmspwn.fish;
+                spawnData["hitem"] = pkmspwn.hitem;
+                spawnList.Add(spawnData);
+            }
+            return spawnList;
+       }
 
         // API return an array of all usable Headbutt trees on the currrent map. format : {index = {"x" = x, "y" = y}}
         private List<Dictionary<string, int>> GetActiveHeadbuttTrees()
@@ -1782,6 +1828,19 @@ namespace PROBot.Scripting
             Bot.PokemonEvolver.IsEnabled = false;
             return !Bot.PokemonEvolver.IsEnabled;
         }
+        //API: Activates npc trainers battling on sight, which is the default. 
+        private bool EnableTrainerBattles()
+        {
+            Bot.Game.IsTrainerBattlesActive = true;
+            return Bot.Game.IsTrainerBattlesActive;
+        }
+
+        //API: Deactivates npc trainer battles.
+        private bool DisableTrainerBattles()
+        {
+            Bot.Game.IsTrainerBattlesActive = false;
+            return !Bot.Game.IsTrainerBattlesActive;
+        }
 
         // API: Check if the private message from normal users are blocked.
         private bool IsPrivateMessageEnabled()
@@ -2825,6 +2884,151 @@ namespace PROBot.Scripting
         {
             if (Bot.TextOptions.ContainsKey(index))
                 Bot.RemoveText(index);
+        }
+	private string GetInputDialog(string[] options)
+	{
+		InputDialog.InputDialog input = new InputDialog.InputDialog("Input", "Please select:", options);
+			string selection = "error";
+			if (input.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+				selection = input.getSelection();
+			input.Dispose();
+			return selection;
+	}
+	 
+         // API: Return the state of the team inspection
+        private bool IsTeamInspectionEnabled()
+        {
+            return Bot.Game.IsTeamInspectionEnabled;
+        }
+
+        // API: Disable team inspection
+        private bool DisableTeamInspection()
+        {
+            return Bot.Game.DisableTeamInspection();
+        }
+
+        // API: Enable team inspection
+        private bool EnableTeamInspection()
+        {
+            return Bot.Game.EnableTeamInspection();
+        }
+
+        // API: Logs in using specified credentials
+        private void Login(string accountName, string password, string server, int socks = 0, string host = "", int port = 0, string socksUser = "", string socksPass = "")
+        {
+            server = server.ToUpperInvariant();
+
+            if (Bot.Game != null)
+            {
+                Fatal("error: login: tried to login while already logged in");
+                return;
+            }
+
+            if (server != "BLUE" && server != "RED" && server != "YELLOW")
+            {
+                Fatal("error: login: tried to connect to an invalid server: \"" + server + "\"");
+                return;
+            }
+
+            LogMessage("Connecting to the server...");
+            Account account = new Account(accountName);
+            account.Password = password;
+            account.Server = server;
+
+            if (socks == 4 || socks == 5)
+            {
+                account.Socks.Version = (SocksVersion)socks;
+                account.Socks.Host = host;
+                account.Socks.Port = port;
+                account.Socks.Username = socksUser;
+                account.Socks.Password = socksPass;
+            }
+
+            Bot.Login(account);
+        }
+
+        // API: Logs out and logs back in after the specified number of seconds, then starts the script shortly after
+        private void Relog(float seconds, string message)
+        {
+            DynValue name = DynValue.NewString(Bot.Account.Name);
+            DynValue password = DynValue.NewString(Bot.Account.Password);
+            DynValue server = DynValue.NewString(Bot.Account.Server);
+
+            if (Bot.Account.Socks.Version != SocksVersion.None)
+            {
+                DynValue socks = DynValue.NewNumber((int)Bot.Account.Socks.Version);
+                DynValue host = DynValue.NewString(Bot.Account.Socks.Host);
+                DynValue port = DynValue.NewNumber(Bot.Account.Socks.Port);
+                DynValue socksUser = DynValue.NewString(Bot.Account.Socks.Username);
+                DynValue socksPass = DynValue.NewString(Bot.Account.Socks.Password);
+                Invoke(_lua.Globals.Get("login"), seconds, name, password, server, socks, host, port, socksUser, socksPass);
+            }
+            else
+            {
+                Invoke(_lua.Globals.Get("login"), seconds, name, password, server);
+            }
+
+            Invoke(_lua.Globals.Get("startScript"), seconds + 10);
+            Logout(message);
+        }
+        
+        // API: Starts the loaded script (usable in the outer scope or with invoke)
+        private bool StartScript()
+        {
+            if (Bot.Game != null && (Bot.Running == BotClient.State.Stopped || Bot.Running == BotClient.State.Paused))
+            {
+                Bot.Start();
+                return true;
+            }
+
+            return false;
+        }
+        
+        // API: Calls the specified function after the specified number of seconds
+        public void Invoke(DynValue function, float seconds, params DynValue[] args)
+        {
+            if (function.Type != DataType.Function && function.Type != DataType.ClrFunction)
+            {
+                Fatal("error: invoke: tried to call an invalid function");
+                return;
+            }
+
+            if (seconds == 0)
+            {
+                _lua.Call(function, args);
+                return;
+            }
+
+            Invoker invoker = new Invoker()
+            {
+                Function = function,
+                Time = DateTime.UtcNow.AddSeconds(seconds),
+                Script = this,
+                Args = args
+            };
+
+            Invokes.Add(invoker);
+        }
+        
+        // API: Cancels all queued Invokes
+        private void CancelInvokes()
+        {
+		Bot.CancelInvokes();
+        }
+    }
+
+    public class Invoker
+    {
+        public DynValue Function;
+        public DateTime Time;
+        public LuaScript Script;
+        public DynValue[] Args;
+        public bool Called = false;
+
+        public void Call()
+        {
+            Called = true;
+            Script.Invoke(Function, 0, Args);
         }
     }
 }
