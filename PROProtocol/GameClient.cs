@@ -1,5 +1,7 @@
-﻿using System;
+//#define DEBUG_TRAINER_BATTLES
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 
 namespace PROProtocol
@@ -10,6 +12,7 @@ namespace PROProtocol
         public Language I18n { get; private set; }
 
         public bool IsConnected { get; private set; }
+        
         public bool IsAuthenticated { get; private set; }
         public string PlayerName { get; private set; }
 
@@ -21,6 +24,7 @@ namespace PROProtocol
         public int PokedexOwned { get; private set; }
         public int PokedexSeen { get; private set; }
         public int PokedexEvolved { get; private set; }
+        public List<PokemonSpawn> SpawnList { get; private set; }
 
         public bool IsInBattle { get; private set; }
         public bool IsSurfing { get; private set; }
@@ -30,7 +34,10 @@ namespace PROProtocol
         public bool CanUseCut { get; private set; }
         public bool CanUseSmashRock { get; private set; }
         public bool IsPrivateMessageOn { get; private set; }
+        public bool IsTrainerBattlesActive { get; set; }
 
+        public bool IsTeamInspectionEnabled { get; private set; }
+	    
         public int Money { get; private set; }
         public int Coins { get; private set; }
         public bool IsMember { get; private set; }
@@ -70,6 +77,7 @@ namespace PROProtocol
         public event Action<List<Npc>> NpcReceived;
         public event Action PokemonsUpdated;
         public event Action InventoryUpdated;
+        public event Action<List<PokemonSpawn>> SpawnListUpdated;
         public event Action BattleStarted;
         public event Action<string> BattleMessage;
         public event Action BattleEnded;
@@ -93,6 +101,18 @@ namespace PROProtocol
         public event Action<Shop> ShopOpened;
         public event Action<List<Pokemon>> PCBoxUpdated;
 
+        #region Trading Variables
+        public event Action<string> TradeRequested;
+        public event Action TradeCanceled;
+        public event Action TradeAccepted;
+        public event Action<string[]> TradeMoneyUpdated;
+        public event Action TradePokemonUpdated;
+        public event Action<string[]> TradeStatusUpdated;
+        public event Action TradeStatusReset;
+        public List<TradePokemon> First_Trade;
+        public List<TradePokemon> Second_Trade;
+        #endregion
+
         private const string Version = "Sinnoh";
 
         private GameConnection _connection;
@@ -114,6 +134,11 @@ namespace PROProtocol
         private Timeout _refreshingPCBox = new Timeout();
 
         private MapClient _mapClient;
+
+        public void ClearPath()
+        {
+            _movements.Clear();
+        }
 
         public bool IsInactive
         {
@@ -178,6 +203,13 @@ namespace PROProtocol
             Players = new Dictionary<string, PlayerInfos>();
             PCGreatestUid = -1;
             IsPrivateMessageOn = true;
+
+            SpawnList = new List<PokemonSpawn>();
+            IsTeamInspectionEnabled = true;
+
+            IsTrainerBattlesActive = true;
+            First_Trade = new List<TradePokemon>();
+            Second_Trade = new List<TradePokemon>();
         }
 
         public void Open()
@@ -304,15 +336,173 @@ namespace PROProtocol
             }
         }
 
+        
+        /// <summary>
+        /// A dictionary containing a point as key and it's guarding battler as value. Building the dictionary like that
+        /// is a little less readable and takes a bit more memory, but allows an access speed of O(1) instead of O(n).
+        /// Which is the case, when stored in a list. Since fields need to be tested after every movement, access speed
+        /// was prioritized.
+        /// </summary>
+        /// <attention>
+        /// Access via getGuardedFields(). Never call it directly.
+        /// </attention>
+		private Dictionary<Point, Npc> _guardedFields = null;
+        private Dictionary<Point, Npc> getGuardedFields()
+        {
+#if DEBUG && DEBUG_TRAINER_BATTLES
+            Console.WriteLine("Trainer Battles | guarded fields | access");
+#endif
+
+            //if initiated, then return it
+            if (_guardedFields != null)
+            {
+                return _guardedFields;
+            }
+
+#if DEBUG && DEBUG_TRAINER_BATTLES
+            Console.WriteLine("Trainer Battles | guarded fields | init");
+            Console.WriteLine("Trainer Battles | map ncp | count: " + Map.Npcs.Count);
+#endif
+
+            //initiate guardedFields
+            _guardedFields = new Dictionary<Point, Npc>();
+
+            //iterating all battlers
+            foreach (Npc battler in Map.Npcs.Where(npc => npc.CanBattle))
+            {
+
+#if DEBUG && DEBUG_TRAINER_BATTLES
+                Console.WriteLine("Trainer Battles | map ncp | "+battler.Id+" ("+battler.Name+") | guarded field count: " + getGuardedFields(battler).Count);
+#endif
+                //iterate all points those battlers have in vision
+                foreach (Point guardedField in getGuardedFields(battler))
+                {
+#if DEBUG && DEBUG_TRAINER_BATTLES
+                    if (_guardedFields.ContainsKey(guardedField))
+                        Console.WriteLine("Trainer Battles | guarded fields | conflict: " + guardedField.ToString());
+#endif
+                    //fill dictionary
+                    _guardedFields.Add(guardedField, battler);
+                }
+            }
+
+            return _guardedFields;
+        }
+
+        /// <summary>
+        /// A list of valid movement operations that don't break line of vision.
+        /// </summary>
+        /// <attention>
+        /// Only accessed by getGuardedFields() and shouldn't otherwise.
+        /// </attention>
+        private HashSet<Map.MoveResult> _validMovementResults = null;
+        private List<Point> getGuardedFields(Npc battler)
+        {
+            //init on first usage
+            if (_validMovementResults == null)
+            {
+                _validMovementResults = new HashSet<Map.MoveResult>();
+                _validMovementResults.Add(Map.MoveResult.Success);   //standard behaviour, free vision
+                _validMovementResults.Add(Map.MoveResult.Sliding);   //when sliding on ice, you can still be stopped for battle
+            }
+
+            //access declaration for future easy manipulation
+            Direction viewDirection = battler.ViewDirection;
+            int viewRange = battler.LosLength;
+
+            //the list of guarded fields in one direction
+            List<Point> guardedFields = new List<Point>();
+
+            //making copy, because reference would modify battlers position
+            //all elements in list would probably point to same Point obj at that time
+            Point battlerPos = new Point(battler.PositionX, battler.PositionY);
+            Point checkingPos = new Point(battler.PositionX, battler.PositionY);
+
+            //references, will be modified by Map.CanMove()
+            bool isOnGround = IsOnGround;
+            bool isSurfing = IsSurfing;
+
+            //algorithm vars, initiated to fail if not changed
+            Map.MoveResult result = Map.MoveResult.Fail;
+            bool isBlocked = true;
+            bool isInViewRange = false;
+
+            while (true)
+            {
+                //move into direction
+                checkingPos = viewDirection.ApplyToCoordinates(checkingPos);
+
+                //calculate move results
+                result = Map.CanMove(viewDirection, checkingPos.X, checkingPos.Y, isOnGround, isSurfing, CanUseCut, CanUseSmashRock);
+                isBlocked = !_validMovementResults.Contains(result);
+                isInViewRange = getManhattanDistance(battlerPos, checkingPos) <= viewRange;
+
+                //adding to guarded fields, if conditions are set
+                if (!isBlocked && isInViewRange)
+                    guardedFields.Add(checkingPos);
+
+                //leave loop otherwise
+                else
+                    break;
+            }
+
+            return guardedFields;
+        }
+
+        /// <summary>
+        /// In short: the method summarizes the axial differences. Google for Manhatten Distance or see
+        /// https://en.wikipedia.org/wiki/Taxicab_geometry for more information.
+        /// </summary>
+        /// <param name="p1">Start point of the distance calculation.</param>
+        /// <param name="p2">End point of the distance calculation.</param>
+        /// <returns>The manhatten distance between two points.</returns>
+        /// <remarks>
+        /// Couldn't find available libs for this standard function, so I still needed to implement it.
+        /// </remarks>
+        private static int getManhattanDistance(Point p1, Point p2)
+        {
+            return Math.Abs(p1.X - p2.X) + Math.Abs(p1.Y - p2.Y);
+        }
+
+        
         private bool ApplyMovement(Direction direction)
         {
+            //init vars
             int destinationX = PlayerX;
             int destinationY = PlayerY;
             bool isOnGround = IsOnGround;
             bool isSurfing = IsSurfing;
 
             direction.ApplyToCoordinates(ref destinationX, ref destinationY);
+           Point playerPos = new Point(PlayerX, PlayerY);
 
+#if DEBUG && DEBUG_TRAINER_BATTLES
+            Console.WriteLine("Trainer Battles | IsTrainerBattlesActive | " + IsTrainerBattlesActive);
+            Console.WriteLine("Trainer Battles | guarded fields | count: " + getGuardedFields().Count);
+            Console.WriteLine("Trainer Battles | guarded fields | contains playerpos: " + getGuardedFields().ContainsKey(playerPos));
+#endif
+            //--------analyze current position
+            if (IsTrainerBattlesActive && getGuardedFields().TryGetValue(playerPos, out Npc battler))
+            {
+                //stop bot movement
+                _movements.Clear();
+
+                //TODO: if wanted battler movement could be triggered here
+
+                //start battle
+                TalkToNpc(battler.Id);
+
+                //while sending, remove listed guarding fields
+                //ATTENTION: don't know how to handle interrupts here
+                foreach (Point guarded in getGuardedFields(battler))
+                    getGuardedFields().Remove(guarded);
+
+                //no further movement therefore return
+                return false;
+            }
+
+
+            //--------analyze next movement
             Map.MoveResult result = Map.CanMove(direction, destinationX, destinationY, isOnGround, isSurfing, CanUseCut, CanUseSmashRock);
             if (Map.ApplyMovement(direction, result, ref destinationX, ref destinationY, ref isOnGround, ref isSurfing))
             {
@@ -369,9 +559,7 @@ namespace PROProtocol
                 }
                 else if (ScriptStatus == 1234) // Yes, this is a magic value. I don't care.
                 {
-                    //0-3 female - 4-7 male
-                    //all bots will be male slaves - hahah 
-                    SendCreateCharacter(Rand.Next(14), Rand.Next(28), 4 + Rand.Next(4), Rand.Next(6), Rand.Next(5));
+                    SendCreateCharacter(Rand.Next(14), Rand.Next(28), Rand.Next(8), Rand.Next(6), Rand.Next(5));
                     IsScriptActive = false;
                     _dialogTimeout.Set();
                 }
@@ -1107,6 +1295,31 @@ namespace PROProtocol
                 case "m":
                     OnPCBox(data);
                     break;
+                case "k":
+                    LoadSpawnMenu(data);
+                    break;
+                #region Trade actions
+                case "mb":
+                    // Actions : Trades requests, Friends requests..
+                    HandleActions(data);
+                    break;
+                case "t":
+                    // Trade Start
+                    HandleTrade(data);
+                    break;
+                case "tu":
+                    OnTradeUpdate(data);
+                    break;
+                case "ta":
+                    UselessTradeFeature(); // Send a "change to final screen" order to client. Useless.
+                    break;
+                case "tb":
+                    OnTradeStatusChange(data);
+                    break;
+                case "tc":
+                    OnTradeStatusReset();
+                    break;
+                #endregion
                 default:
 #if DEBUG
                     Console.WriteLine(" ^ unhandled /!\\");
@@ -1115,6 +1328,19 @@ namespace PROProtocol
             }
         }
 
+        public bool DisableTeamInspection()
+        {
+            IsTeamInspectionEnabled = false;
+            SendMessage("/in0");
+            return true;
+        }
+
+        public bool EnableTeamInspection()
+        {
+            IsTeamInspectionEnabled = true;
+            SendMessage("/in1");
+            return true;
+        }
 
         private void OnLoggedIn(string[] data)
         {
@@ -1229,8 +1455,8 @@ namespace PROProtocol
         {
             if (!IsMapLoaded) return;
 
-            IEnumerable<int> defeatedBattlers = data[1].Split(new [] { "|" }, StringSplitOptions.RemoveEmptyEntries).Select(id => int.Parse(id));
-
+            IEnumerable<int> defeatedBattlers = data[1].Split(new[] { "|" }, StringSplitOptions.RemoveEmptyEntries).Select(id => int.Parse(id));
+ 
             Map.Npcs.Clear();
             foreach (Npc npc in Map.OriginalNpcs)
             {
@@ -1876,6 +2102,147 @@ namespace PROProtocol
             MapName = mapName;
             _mapClient.DownloadMap(MapName);
             Players.Clear();
+            //when new map is requested, reset guarded fields from npc traineres
+            _guardedFields = null;
+#if DEBUG && DEBUG_TRAINER_BATTLES
+            Console.WriteLine("Trainer Battles | guarded fields | reset");
+#endif
         }
+
+        private void LoadSpawnMenu(string[] data)
+        {
+            string[] sdata = data[1].Split(',');
+            SpawnList = new List<PokemonSpawn>();
+            for (int i = 1; i < sdata.Length - 1; i++)
+            {
+                bool fish = false;
+                bool surf = false;
+                bool hitem = false;
+                bool msonly = false;
+                bool captured = false;
+
+                if (sdata[i].Contains("f"))
+                {
+                    fish = true;
+                    sdata[i] = sdata[i].Replace("f", string.Empty);
+                }
+
+                if (sdata[i].Contains("i"))
+                {
+                    hitem = true;
+                    sdata[i] = sdata[i].Replace("i", string.Empty);
+                }
+
+                if (sdata[i].Contains("s"))
+                {
+                    surf = true;
+                    sdata[i] = sdata[i].Replace("s", string.Empty);
+                }
+
+                if (sdata[i].Contains("m"))
+                {
+                    msonly = true;
+                    sdata[i] = sdata[i].Replace("m", string.Empty);
+                }
+
+                if (sdata[i].Contains("c"))
+                {
+                    captured = true;
+                    sdata[i] = sdata[i].Replace("c", string.Empty);
+                }
+
+                // Shit for ms color lol
+                if (sdata[i].Contains("x"))
+                {
+                    sdata[i] = sdata[i].Replace("x", string.Empty);
+                }
+                PokemonSpawn pokeaadd = new PokemonSpawn(Convert.ToInt32(sdata[i]), captured, surf, fish, hitem, msonly);
+
+                SpawnList.Add(pokeaadd);
+            }
+            SpawnListUpdated?.Invoke(SpawnList);
+
+        }
+
+        #region Trade functions
+        private void HandleActions(string[] data)
+        {
+            string action = (data[1].Split('|'))[3];
+            if (action.Contains("/trade")) {
+                OnTradeRequest(data);
+            }
+            else
+            {
+                // Known : Friend request.
+                // Others : ??? Maybe guilde invites, etc.
+            }
+        }
+
+        private void OnTradeRequest(string[] data )
+        {
+            string applicant = (data[1].Split('|'))[3].Replace("/trade ", ""); // Basically getting exchange applicant.
+            TradeRequested?.Invoke(applicant);
+        }
+
+        private void HandleTrade(string[] data)
+        {
+            string[] tdata = data[1].Split('|');
+            string type = tdata[0];
+            if (type == "c")
+            {
+                TradeCanceled?.Invoke();
+            } 
+            else
+            {
+                TradeMoneyUpdated?.Invoke(tdata);
+                Console.WriteLine(tdata[0] + '|' + tdata[1] + '|' // First exhcnager
+                 + tdata[2] + '|' // Second
+                 + tdata[3] + '|' // First money on exhcnage
+                 + tdata[4] + '|'); // Second money on exchange0
+            }
+        }
+
+        private void OnTradeUpdate(string[] data)
+        {
+            string[] teamData = data[1].Split('|');
+            int UID = 0;
+            First_Trade.Clear();
+            Second_Trade.Clear();
+            List <TradePokemon>  tradeList = new List<TradePokemon>();
+            foreach (string pokemon in teamData)
+            {
+                UID++;
+                if (pokemon == string.Empty)
+                    continue;
+
+                string[] pokemonData = pokemon.Split(',');
+                if (UID <= 6)
+                {
+                    First_Trade.Add(new TradePokemon(pokemonData));
+                }
+                else
+                {
+                    Second_Trade.Add(new TradePokemon(pokemonData));
+                }
+            }
+            TradePokemonUpdated?.Invoke();
+        }
+
+        private void OnTradeStatusChange(string[] data)
+        {
+            TradeStatusUpdated?.Invoke(data);
+        }
+
+        // Send a "change to final screen" order to client. Useless.
+        private void UselessTradeFeature()
+        {
+            TradeAccepted?.Invoke();
+        }
+
+        private void OnTradeStatusReset()
+        {
+            TradeStatusReset?.Invoke();
+        }
+        #endregion
     }
 }

@@ -116,7 +116,9 @@ namespace PROProtocol
                         int x = reader.ReadInt16();
                         int y = reader.ReadInt16();
 
-                        int direction = reader.ReadByte();
+                        //view direction and length
+                        int directionValue = reader.ReadByte();
+                        Direction viewDirection = DirectionExtensions.FromInt(directionValue);
                         int losLength = reader.ReadByte();
                         int type = reader.ReadInt16();
 
@@ -148,8 +150,8 @@ namespace PROProtocol
 
                         if (npcName != "TileScript")
                         {
-                            OriginalNpcs.Add(new Npc(npcId, npcName, isBattler, type, x, y, losLength, path));
-                        }
+                            OriginalNpcs.Add(new Npc(npcId, npcName, isBattler, type, x, y, viewDirection, losLength, path));
+                      }
 
                         reader.ReadInt16();
                         reader.ReadInt16();
@@ -320,6 +322,7 @@ namespace PROProtocol
             {
                 int num = Tiles2[x, y];
                 int num2 = Tiles3[x, y];
+                bool hasLink = HasLink(x, y);
                 return (num == 6 || num == 14 || num == 55 || num == 15 || num == 248 || num == 249 || num == 250 || num2 == 6 || num2 == 14 || num2 == 55 || num2 == 15 || num2 == 248 || num2 == 249 || num2 == 250);
             }
             return false;
