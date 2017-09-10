@@ -11,7 +11,8 @@
                  IsReadOnly="True"
                  TextWrapping="Wrap"
                  ScrollViewer.VerticalScrollBarVisibility="Auto"
-                 Background="#FFDFE4EE">
+                 Background="#FF2c2f33" 
+                 Foreground="#FF99aab5">
         </TextBox>
     </Grid>
 </UserControl>

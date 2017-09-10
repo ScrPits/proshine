@@ -6,13 +6,13 @@
         xmlns:fa="http://schemas.fontawesome.io/icons/"
         xmlns:local="clr-namespace:PROShine"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="800" Background="#FFCDD5E2" Foreground="#FF101020" Icon="../logo.ico" FontSize="13.333">
+        Title="MainWindow" Height="600" Width="800" Background="#FF23272a" Foreground="#FF99aab5" Icon="../logo.ico" FontSize="13.333">
     <Window.Resources>
         <LinearGradientBrush x:Key="CheckedBlue" StartPoint="0,0" EndPoint="0,1">
             <GradientStop Color="#FFb5c3da" Offset="0" />
             <GradientStop Color="#FFC3CFE1" Offset="1" />
         </LinearGradientBrush>
-        <SolidColorBrush x:Key="CheckedBlueBorder" Color="#FF909CAE" />
+        <SolidColorBrush x:Key="CheckedBlueBorder" Color="#FF7289da" />
         <Style x:Key="SwitchStyle" TargetType="{x:Type CheckBox}">
             <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.WindowTextBrushKey}}" />
             <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowBrushKey}}" />
@@ -34,11 +34,11 @@
                         <DockPanel x:Name="dockPanel">
                             <ContentPresenter SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" Content="{TemplateBinding Content}" ContentStringFormat="{TemplateBinding ContentStringFormat}" ContentTemplate="{TemplateBinding ContentTemplate}" RecognizesAccessKey="True" VerticalAlignment="Center" />
                             <Grid>
-                                <Border x:Name="BackgroundBorder" BorderBrush="#FF939393" BorderThickness="1" CornerRadius="3" Height="25" Width="60">
+                                <Border x:Name="BackgroundBorder" BorderBrush="#FF23272a" BorderThickness="1" CornerRadius="3" Height="25" Width="60">
                                     <Border.Background>
                                         <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-                                            <GradientStop Color="#FFB5B5B5" Offset="0" />
-                                            <GradientStop Color="#FFFEFEFE" Offset="1" />
+                                            <GradientStop Color="#FF7289da" Offset="0" />
+                                            <GradientStop Color="#FF7289da" Offset="1" />
                                         </LinearGradientBrush>
                                     </Border.Background>
                                     <Grid>
@@ -50,7 +50,7 @@
                                         <TextBlock Name="Off" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Text="OFF" />
                                     </Grid>
                                 </Border>
-                                <Border BorderBrush="#FF939393" HorizontalAlignment="Left" x:Name="slider" Width="30" Height="25" BorderThickness="1" CornerRadius="3" RenderTransformOrigin="0.5,0.5" Margin="0">
+                                <Border BorderBrush="#FF23272a" HorizontalAlignment="Left" x:Name="slider" Width="30" Height="25" BorderThickness="1" CornerRadius="3" RenderTransformOrigin="0.5,0.5" Margin="0">
                                     <Border.RenderTransform>
                                         <TransformGroup>
                                             <ScaleTransform ScaleX="1" ScaleY="1" />
@@ -61,9 +61,9 @@
                                     </Border.RenderTransform>
                                     <Border.Background>
                                         <LinearGradientBrush EndPoint="0,1" StartPoint="0,0">
-                                            <GradientStop Color="#FFF0F0F0" Offset="0" />
-                                            <GradientStop Color="#FFCDCDCD" Offset="0.1" />
-                                            <GradientStop Color="#FFFBFBFB" Offset="1" />
+                                            <GradientStop Color="#FF7289da" Offset="0" />
+                                            <GradientStop Color="#FF2c2f33" Offset="0.1" />
+                                            <GradientStop Color="#FF7289da" Offset="1" />
                                         </LinearGradientBrush>
                                     </Border.Background>
                                 </Border>
@@ -93,8 +93,8 @@
             <RowDefinition Height="2*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        <DockPanel Grid.Row="0" Background="#FFB5C3DA" HorizontalAlignment="Stretch">
-            <Menu IsMainMenu="True" Background="#FFB5C3DA" Foreground="#FF101020" FontSize="13.333">
+        <DockPanel Grid.Row="0" Background="#FF2c2f33" HorizontalAlignment="Stretch">
+            <Menu IsMainMenu="True" Background="#FF2c2f33" Foreground="#FF99aab5" FontSize="13.333">
                 <MenuItem Header="Connection">
                     <MenuItem Name="LoginMenuItem" Header="Login" Click="LoginMenuItem_Click" />
                     <MenuItem Name="LogoutMenuItem" Header="Logout" Click="LogoutMenuItem_Click" IsEnabled="False" />
@@ -113,50 +113,59 @@
                     <MenuItem Header="About" Click="MenuAbout_Click" />
                 </MenuItem>
             </Menu>
-            <DockPanel Background="#FFB5C3DA" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,2">
-                <TextBlock Name="StatusIcon" Foreground="#FF101020" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
+            <DockPanel Background="#FF2c2f33" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,2">
+                <TextBlock Name="StatusIcon" Foreground="#FF7289da" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="LightbulbOutline" VerticalAlignment="Center" />
                 </TextBlock>
                 <TextBlock Name="StatusText" Text="Offline" Foreground="DarkRed" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <TextBlock Name="PokeTimeIcon" Foreground="#FF101020" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
+                <TextBlock Name="PokeTimeIcon" Foreground="#FF7289da" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="ClockOutline" VerticalAlignment="Center" />
                 </TextBlock>
                 <TextBlock Name="PokeTimeText" Text="??:??" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <TextBlock Name="MapNameIcon" Foreground="#FF101020" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
+                <TextBlock Name="MapNameIcon" Foreground="#FF7289da" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="MapOutline" VerticalAlignment="Center"/>
                 </TextBlock>
-                <TextBlock Name="MapNameText" Text="Not Loaded" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <TextBlock Name="PlayerPositionIcon" Foreground="#FF101020" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
+                <TextBlock Name="MapNameText" Text="Not Loaded" Margin="2,2,2,2" VerticalAlignment="Center">
+                    <TextBlock.ToolTip>
+                        <StackPanel Name="SpawnList" />
+                    </TextBlock.ToolTip>
+                </TextBlock>
+                <TextBlock Name="PlayerPositionIcon" Foreground="#FF7289da" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="Compass" VerticalAlignment="Center" />
                 </TextBlock>
                 <TextBlock Name="PlayerPositionText" Text="(?,?)" Margin="2,2,2,2" VerticalAlignment="Center"/>
-                <TextBlock Name="MoneyIcon" Foreground="#FF101020" FontSize="15" Margin="8,4,2,2" VerticalAlignment="Center">
+                <TextBlock Name="MoneyIcon" Foreground="#FF7289da" FontSize="15" Margin="8,4,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="Rub" VerticalAlignment="Center"/>
                 </TextBlock>
                 <TextBlock Name="MoneyText" Text="?" Margin="2,2,2,2" VerticalAlignment="Center"/>
             </DockPanel>
         </DockPanel>
-        <WrapPanel Grid.Row="1" Background="#dae1ec" VerticalAlignment="Center" Margin="4, 2, 4, 2">
-            <Button x:Name="LoginButton" Margin="2,1,2,1" Background="#FFCDD5E2" Foreground="#FF101020" Click="LoginButton_Click">
+        <WrapPanel Grid.Row="1" Background="#FF2c2f33" VerticalAlignment="Center" Margin="4, 2, 4, 2">
+            <Button x:Name="LoginButton" Margin="2,1,2,1" Background="#FF23272a" Foreground="#FF99aab5" Click="LoginButton_Click">
                 <Button.Content>
-                    <fa:FontAwesome Name="LoginButtonIcon"  Foreground="#FF101020" Icon="SignIn" Padding="2, 2, 2, 2" FontSize="16"/>
+                    <fa:FontAwesome Name="LoginButtonIcon"  Foreground="#FF7289da" Icon="SignIn" Padding="2, 2, 2, 2" FontSize="16"/>
                 </Button.Content>
             </Button>
-            <Button x:Name="StartScriptButton" Margin="2,1,2,1" Background="#FFCDD5E2" Foreground="#FF101020" Click="StartScriptButton_Click">
+            <Button x:Name="StartScriptButton" Margin="2,1,2,1" Background="#FF23272a" Foreground="#FF99aab5" Click="StartScriptButton_Click">
                 <Button.Content>
-                    <fa:FontAwesome Name="StartScriptButtonIcon"  Foreground="#FF101020" Icon="Play" Padding="2, 2, 2, 2" FontSize="16"/>
+                    <fa:FontAwesome Name="StartScriptButtonIcon"  Foreground="#FF7289da" Icon="Play" Padding="2, 2, 2, 2" FontSize="16"/>
                 </Button.Content>
             </Button>
-            <Button x:Name="StopScriptButton" Margin="2,1,2,1" Background="#FFCDD5E2" Foreground="#FF101020" Click="StopScriptButton_Click">
+            <Button x:Name="StopScriptButton" Margin="2,1,2,1" Background="#FF23272a" Foreground="#FF99aab5" Click="StopScriptButton_Click">
                 <Button.Content>
-                    <fa:FontAwesome Name="StopScriptButtonIcon" Foreground="#FF101020" Icon="Stop" Padding="2, 2, 2, 2" FontSize="16"/>
+                    <fa:FontAwesome Name="StopScriptButtonIcon" Foreground="#FF7289da" Icon="Stop" Padding="2, 2, 2, 2" FontSize="16"/>
                 </Button.Content>
             </Button>
-            <Button x:Name="LoadScriptButton" Margin="2,1,2,1" Background="#FFCDD5E2" Foreground="#FF101020" Click="LoadScriptButton_Click">
+            <Button x:Name="LoadScriptButton" Margin="2,1,2,1" Background="#FF23272a" Foreground="#FF99aab5" Click="LoadScriptButton_Click">
                 <Button.Content>
-                    <fa:FontAwesome Name="LoadScriptButtonIcon" Foreground="#FF101020" Icon="Folder" Padding="2, 2, 2, 2" FontSize="16"/>
+                    <fa:FontAwesome Name="LoadScriptButtonIcon" Foreground="#FF7289da" Icon="Folder" Padding="2, 2, 2, 2" FontSize="16"/>
                 </Button.Content>
             </Button>
+            <CheckBox x:Name="IsTrainerBattlesActiveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Npc-KO: " Checked="IsTrainerBattlesActiveSwitch_Checked" Unchecked="IsTrainerBattlesActiveSwitch_Unchecked">
+                <CheckBox.ToolTip>
+                    <TextBlock><Run Text="Fights NPC Like a Normal Player."/></TextBlock>
+                </CheckBox.ToolTip>
+            </CheckBox>
             <CheckBox x:Name="AutoEvolveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Auto-evolve: " Checked="AutoEvolveSwitch_Checked" Unchecked="AutoEvolveSwitch_Unchecked">
                 <CheckBox.ToolTip>
                     <TextBlock>Always evolve a pokemon.</TextBlock>
@@ -229,44 +238,53 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
-                    <ToggleButton Name="TeamButton" Grid.Row="0" Margin="1" Background="#FFCDD5E2" Foreground="#FF101020">
+                    <ToggleButton Name="TeamButton" Grid.Row="0" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
                         <ToggleButton.Content>
                             <StackPanel>
-                                <fa:FontAwesome Icon="Paw" Foreground="#FF101020" FontSize="15" Margin="4,1,4,1" />
+                                <fa:FontAwesome Icon="Paw" Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
                                 <TextBlock Text="Team" Margin="4,1,4,1" />
                             </StackPanel>
                         </ToggleButton.Content>
                     </ToggleButton>
-                    <ToggleButton Name="InventoryButton" Grid.Row="1" Margin="1" Background="#FFCDD5E2" Foreground="#FF101020">
+                    <ToggleButton Name="InventoryButton" Grid.Row="1" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
                         <ToggleButton.Content>
                             <StackPanel>
-                                <fa:FontAwesome Icon="Suitcase" Foreground="#FF101020" FontSize="15" Margin="4,1,4,1" />
+                                <fa:FontAwesome Icon="Suitcase" Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
                                 <TextBlock Text="Inventory" Margin="4,1,4,1" />
                             </StackPanel>
                         </ToggleButton.Content>
                     </ToggleButton>
-                    <ToggleButton Name="ChatButton" Grid.Row="2" Margin="1" Background="#FFCDD5E2" Foreground="#FF101020">
+                    <ToggleButton Name="ChatButton" Grid.Row="2" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
                         <ToggleButton.Content>
                             <StackPanel>
-                                <fa:FontAwesome Icon="Comment" Foreground="#FF101020" FontSize="15" Margin="4,1,4,1" />
+                                <fa:FontAwesome Icon="Comment" Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
                                 <TextBlock Text="Chat" Margin="4,1,4,1" />
                             </StackPanel>
                         </ToggleButton.Content>
                     </ToggleButton>
-                    <ToggleButton Name="PlayersButton" Grid.Row="3" Margin="1" Background="#FFCDD5E2" Foreground="#FF101020">
+                    <ToggleButton Name="PlayersButton" Grid.Row="3" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
                         <ToggleButton.Content>
                             <StackPanel>
-                                <fa:FontAwesome Icon="Users" Foreground="#FF101020" FontSize="15" Margin="4,1,4,1" />
+                                <fa:FontAwesome Icon="Users" Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
                                 <TextBlock Text="Players" Margin="4,1,4,1" />
                             </StackPanel>
                         </ToggleButton.Content>
                     </ToggleButton>
-                    <ToggleButton Name="MapButton" Grid.Row="4" Margin="1" Background="#FFCDD5E2" Foreground="#FF101020">
+                    <ToggleButton Name="MapButton" Grid.Row="4" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
                         <ToggleButton.Content>
                             <StackPanel>
-                                <fa:FontAwesome Icon="Cube"  Foreground="#FF101020" FontSize="15" Margin="4,1,4,1" />
+                                <fa:FontAwesome Icon="Cube"  Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
                                 <TextBlock Text="Map" Margin="4,1,4,1" />
+                            </StackPanel>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                    <ToggleButton Name="TradeButton" Grid.Row="5" Margin="1" Background="#FF23272a" Foreground="#FF99aab5">
+                        <ToggleButton.Content>
+                            <StackPanel>
+                                <fa:FontAwesome Icon="Exchange"  Foreground="#FF7289da" FontSize="15" Margin="4,1,4,1" />
+                                <TextBlock Text="Trade" Margin="4,1,4,1" />
                             </StackPanel>
                         </ToggleButton.Content>
                     </ToggleButton>
@@ -278,12 +296,14 @@
                 <ContentControl Name="ChatContent" />
                 <ContentControl Name="PlayersContent" />
                 <ContentControl Name="MapContent" />
+                <ContentControl Name="TradeContent" />
             </Grid>
         </Grid>
         <GridSplitter ResizeDirection="Rows" HorizontalAlignment="Stretch" VerticalAlignment="Top" Height="4" Grid.Row="3" Background="Transparent"/>
         <Grid Grid.Row="3" Margin="4">
             <TextBox Name="MessageTextBox"
-                     Background="#FFCDD5E2"
+                     Background="#FF2c2f33" 
+                     Foreground="#FF99aab5"
                      IsReadOnly="True"
                      IsReadOnlyCaretVisible="True"
                      AcceptsReturn="True"

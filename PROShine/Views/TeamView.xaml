@@ -7,8 +7,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300">
     <Grid>
-        <Border BorderThickness="1,0,1,1" BorderBrush="#FFB5C3DA">
-            <ListView Name="PokemonsListView" BorderThickness="0" FontSize="13.333" Background="#FFDFE4EE" Foreground="#FF101020"
+        <Border BorderThickness="1,0,1,1" BorderBrush="#FF23272a">
+            <ListView Name="PokemonsListView" BorderThickness="0" FontSize="13.333" Background="#FF23272a" Foreground="#FF99aab5"
                         PreviewMouseLeftButtonDown="List_PreviewMouseLeftButtonDown" 
                         PreviewMouseMove="List_MouseMove"
                         Drop="List_Drop" 
@@ -19,7 +19,7 @@
                         <Setter Property="ToolTipService.ShowDuration" Value="60000"/>
                         <Setter Property="Control.ToolTip">
                             <Setter.Value>
-                                <Canvas Height="300" Width="430" Background="#403F45">
+                                <Canvas Height="300" Width="430" Background="#FF2c2f33">
                                     <!-- Header -->
                                     <TextBlock Canvas.Top="5" Canvas.Left="10" Text="{Binding Name}" FontSize="18" FontWeight="ExtraBold" Foreground="White"/>
                                     <TextBlock Canvas.Top="8" Canvas.Left="184" Text="{Binding Gender}" FontSize="15" Foreground="White"/>

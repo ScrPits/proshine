@@ -17,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Input;
 using System.Collections.ObjectModel;
 using PROBot.Modules;
+using FontAwesome.WPF;
+using System.Windows.Documents;
 
 namespace PROShine
 {
@@ -29,6 +31,7 @@ namespace PROShine
         public ChatView Chat { get; private set; }
         public PlayersView Players { get; private set; }
         public MapView Map { get; private set; }
+        public TradeView Trade { get; private set; }
 
         private struct TabView
         {
@@ -84,6 +87,7 @@ namespace PROShine
             Chat = new ChatView(Bot);
             Players = new PlayersView(Bot);
             Map = new MapView(Bot);
+            Trade = new TradeView(Bot);
 
             FileLog = new FileLogger();
 
@@ -95,6 +99,7 @@ namespace PROShine
             AddView(Chat, ChatContent, ChatButton);
             AddView(Players, PlayersContent, PlayersButton);
             AddView(Map, MapContent, MapButton);
+            AddView(Trade, TradeContent, TradeButton);
 
             SetTitle(null);
 
@@ -440,6 +445,7 @@ namespace PROShine
                         SetTitle(Bot.Account.Name + " - " + Bot.Game.Server);
                         UpdateBotMenu();
                         LogoutMenuItem.IsEnabled = true;
+                        LoginMenuItem.IsEnabled = false;
                         LoginButton.IsEnabled = true;
                         LoginButtonIcon.Icon = FontAwesome.WPF.FontAwesomeIcon.SignOut;
                         LogMessage("Connected, authenticating...");
@@ -588,6 +594,8 @@ namespace PROShine
                     Bot.Game.BattleMessage += Client_BattleMessage;
                     Bot.Game.BattleEnded += Client_BattleEnded;
                     Bot.Game.DialogOpened += Client_DialogOpened;
+                    Bot.Game.SpawnListUpdated += Client_RefreshSpawnList;
+                    //chat
                     Bot.Game.ChatMessage += Chat.Client_ChatMessage;
                     Bot.Game.ChannelMessage += Chat.Client_ChannelMessage;
                     Bot.Game.EmoteMessage += Chat.Client_EmoteMessage;
@@ -596,6 +604,7 @@ namespace PROShine
                     Bot.Game.PrivateMessage += Chat.Client_PrivateMessage;
                     Bot.Game.LeavePrivateMessage += Chat.Client_LeavePrivateMessage;
                     Bot.Game.RefreshChannelList += Chat.Client_RefreshChannelList;
+                    //
                     Bot.Game.SystemMessage += Client_SystemMessage;
                     Bot.Game.PlayerAdded += Client_PlayerAdded;
                     Bot.Game.PlayerUpdated += Client_PlayerUpdated;
@@ -603,12 +612,22 @@ namespace PROShine
                     Bot.Game.InvalidPacket += Client_InvalidPacket;
                     Bot.Game.PokeTimeUpdated += Client_PokeTimeUpdated;
                     Bot.Game.ShopOpened += Client_ShopOpened;
+                    //trade
+                    Bot.Game.TradeRequested += Trade.TradeRequest;
+                    Bot.Game.TradeCanceled += Trade.Reset;
+                    Bot.Game.TradeMoneyUpdated += Trade.UpdateMoney;
+                    Bot.Game.TradePokemonUpdated += Trade_PokemonsUpdated;
+                    Bot.Game.TradeStatusUpdated += Trade.StatusChanged;
+                    Bot.Game.TradeStatusReset += Trade.StatusReset;
+                    Bot.Game.TradeAccepted += Trade.ChangeToFinalView;
+                    //map
                     Bot.Game.MapLoaded += Map.Client_MapLoaded;
                     Bot.Game.PositionUpdated += Map.Client_PositionUpdated;
                     Bot.Game.PlayerAdded += Map.Client_PlayerEnteredMap;
                     Bot.Game.PlayerRemoved += Map.Client_PlayerLeftMap;
                     Bot.Game.PlayerUpdated += Map.Client_PlayerMoved;
                     Bot.Game.NpcReceived += Map.Client_NpcReceived;
+
                 }
             }
             Dispatcher.InvokeAsync(delegate
@@ -670,6 +689,59 @@ namespace PROShine
             });
         }
 
+        private void Client_RefreshSpawnList(List<PokemonSpawn> pkmns)
+        {
+            Dispatcher.InvokeAsync(delegate
+            {
+                SpawnList.Children.Clear();  // Clearing the spawn list before adding new one.
+
+                pkmns.ForEach(delegate (PokemonSpawn pkmn)
+                {
+                    /* Captured : http://fontawesome.io/icon/check/ | Not : http://fontawesome.io/icon/times/
+                     * MSOnly : http://fontawesome.io/icon/certificate/
+                     * SURF : http://fontawesome.io/icon/ship/ | GROUND : http://fontawesome.io/icon/globe/
+                     * MAY HOLD AN ITEM : http://fontawesome.io/icon/percent/
+                    */
+
+                    DockPanel d = new DockPanel();
+                    FontAwesome.WPF.FontAwesome c = new FontAwesome.WPF.FontAwesome();
+                    FontAwesome.WPF.FontAwesome m = new FontAwesome.WPF.FontAwesome();
+                    FontAwesome.WPF.FontAwesome s = new FontAwesome.WPF.FontAwesome();
+                    FontAwesome.WPF.FontAwesome i = new FontAwesome.WPF.FontAwesome();
+
+                    if (pkmn.captured)
+                    {
+                        c.Icon = FontAwesomeIcon.Check;
+                        d.Children.Add(c);
+                    }
+                    if (pkmn.msonly)
+                    {
+                        m.Icon = FontAwesomeIcon.Certificate;
+                        d.Children.Add(m);
+                    }
+                    if (pkmn.surf)
+                    {
+                        s.Icon = FontAwesomeIcon.Ship;
+                        d.Children.Add(s);
+                    }
+                    else
+                    {
+                        s.Icon = FontAwesomeIcon.Globe;
+                        d.Children.Add(s);
+                    }
+                    if (pkmn.hitem)
+                    {
+                        i.Icon = FontAwesomeIcon.Percent;
+                        d.Children.Add(i);
+                    }
+                    TextBlock Name = new TextBlock();
+                    Name.Text = pkmn.name;
+                    d.Children.Add(Name);
+                    SpawnList.Children.Add(d);
+                });
+            });
+        }
+
         private void Client_PokemonsUpdated()
         {
             Dispatcher.InvokeAsync(delegate
@@ -681,6 +753,24 @@ namespace PROShine
                 }
                 Team.PokemonsListView.ItemsSource = team;
                 Team.PokemonsListView.Items.Refresh();
+            });
+        }
+
+        private void Trade_PokemonsUpdated()
+        {
+            Dispatcher.InvokeAsync(delegate
+            {
+                IList<TradePokemon> First_items;
+                IList<TradePokemon> Second_items;
+                lock (Bot)
+                {
+                    First_items = Bot.Game.First_Trade.ToArray();
+                    Second_items = Bot.Game.Second_Trade.ToArray();
+                }
+                Trade.First_list.ItemsSource = First_items;
+                Trade.Second_list.ItemsSource = Second_items;
+                Trade.First_list.Items.Refresh();
+                Trade.Second_list.Items.Refresh();
             });
         }
 
@@ -860,6 +950,7 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.Stop();
+                Bot.CancelInvokes();
             }
         }
 
@@ -933,6 +1024,22 @@ namespace PROShine
             if (shouldLogin)
             {
                 OpenLoginWindow();
+            }
+        }
+
+        private void IsTrainerBattlesActiveSwitch_Checked(object sender, RoutedEventArgs e)
+        {
+            lock (Bot)
+            {
+                Bot.IsTrainerBattlesActive.IsEnabled = true;
+            }
+        }
+
+        private void IsTrainerBattlesActiveSwitch_Unchecked(object sender, RoutedEventArgs e)
+        {
+            lock (Bot)
+            {
+                Bot.IsTrainerBattlesActive.IsEnabled = false;
             }
         }
     }

@@ -227,6 +227,7 @@ namespace PROShine
             {
                 AddChannelTab(channelName);
             }
+
             MainWindow.AppendLineToTextBox((_channelTabs[channelName].Content as ChatPanel).ChatBox,
                 "[" + DateTime.Now.ToLongTimeString() + "] " + author + ": " + message);
         }
