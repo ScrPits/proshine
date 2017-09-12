@@ -940,7 +940,8 @@ namespace PROProtocol
             return HasMove("Surf") &&
                 (Map.Region == "1" && HasItemName("Soul Badge") ||
                 Map.Region == "2" && HasItemName("Fog Badge") ||
-                Map.Region == "3" && HasItemName("Balance Badge"));
+                Map.Region == "3" && HasItemName("Balance Badge") ||
+                Map.Region == "4" && HasItemName("Relic Badge"));
         }
 
         public bool HasCutAbility()
@@ -948,7 +949,8 @@ namespace PROProtocol
             return (HasMove("Cut") || HasTreeaxe()) &&
                 (Map.Region == "1" && HasItemName("Cascade Badge") ||
                 Map.Region == "2" && HasItemName("Hive Badge") ||
-                Map.Region == "3" && HasItemName("Stone Badge"));
+                Map.Region == "3" && HasItemName("Stone Badge") ||
+                Map.Region == "4" && HasItemName("Forest Badge"));
         }
 
         public bool HasRockSmashAbility()
