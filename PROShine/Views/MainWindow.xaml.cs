@@ -891,6 +891,24 @@ namespace PROShine
         {
             LogMessage("System: " + message);
         }
+        
+                private void Collapse_Click(object sender, RoutedEventArgs e)
+        {
+            if (CollapseIcon.Icon.Equals(FontAwesomeIcon.ArrowCircleUp))
+            {
+                oldHeight = Height;
+                oldWidth = Width;
+                MaxHeight = 70.0;
+                MaxWidth = 700.0;
+                CollapseIcon.Icon = FontAwesomeIcon.ArrowCircleDown;
+                return;
+            }
+            MaxHeight = 2147483647.0;
+            Height = oldHeight;
+            MaxWidth = 2147483647.0;
+            Width = oldWidth;
+            CollapseIcon.Icon = FontAwesomeIcon.ArrowCircleUp;
+        }
 
         public static void AppendLineToTextBox(TextBox textBox, string message)
         {
