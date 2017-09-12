@@ -114,6 +114,9 @@
                 </MenuItem>
             </Menu>
             <DockPanel Background="#FF2c2f33" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,2">
+                <Button Background="#FF2c2f33" Foreground="#FF7289da" BorderThickness="0" Click="Collapse_Click">
+                    <fa:FontAwesome Name="CollapseIcon" Icon="ArrowCircleUp" />
+                </Button>
                 <TextBlock Name="StatusIcon" Foreground="#FF7289da" FontSize="15" Margin="8,2,2,2" VerticalAlignment="Center">
                     <fa:FontAwesome Icon="LightbulbOutline" VerticalAlignment="Center" />
                 </TextBlock>
