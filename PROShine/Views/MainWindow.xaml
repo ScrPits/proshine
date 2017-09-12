@@ -164,22 +164,22 @@
                     <fa:FontAwesome Name="LoadScriptButtonIcon" Foreground="#FF7289da" Icon="Folder" Padding="2, 2, 2, 2" FontSize="16"/>
                 </Button.Content>
             </Button>
-            <CheckBox x:Name="IsTrainerBattlesActiveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Npc-KO: " Checked="IsTrainerBattlesActiveSwitch_Checked" Unchecked="IsTrainerBattlesActiveSwitch_Unchecked">
+            <CheckBox x:Name="IsTrainerBattlesActiveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Foreground="#FFc58901" Content="Bully'd: " Checked="IsTrainerBattlesActiveSwitch_Checked" Unchecked="IsTrainerBattlesActiveSwitch_Unchecked">
                 <CheckBox.ToolTip>
-                    <TextBlock><Run Text="Fights NPC Like a Normal Player."/></TextBlock>
+                    <TextBlock><Run Text="Bully Mode - NPC's Fight "Insert player namer" Based on Sight. /></TextBlock>
                 </CheckBox.ToolTip>
             </CheckBox>
-            <CheckBox x:Name="AutoEvolveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Auto-evolve: " Checked="AutoEvolveSwitch_Checked" Unchecked="AutoEvolveSwitch_Unchecked">
+            <CheckBox x:Name="AutoEvolveSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Foreground="#FFc58901" Content="Auto-evolve: " Checked="AutoEvolveSwitch_Checked" Unchecked="AutoEvolveSwitch_Unchecked">
                 <CheckBox.ToolTip>
                     <TextBlock>Always evolve a pokemon.</TextBlock>
                 </CheckBox.ToolTip>
             </CheckBox>
-            <CheckBox x:Name="AvoidStaffSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Staff evader: " Checked="AvoidStaffSwitch_Checked" Unchecked="AvoidStaffSwitch_Unchecked">
+            <CheckBox x:Name="AvoidStaffSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Foreground="#FFc58901"Content="Staff evader: " Checked="AvoidStaffSwitch_Checked" Unchecked="AvoidStaffSwitch_Unchecked">
                 <CheckBox.ToolTip>
                     <TextBlock>Disconnect when a staff member appears on the map. Disable the Auto-reconnect (only works if the admin is not invisible).</TextBlock>
                 </CheckBox.ToolTip>
             </CheckBox>
-            <CheckBox x:Name="AutoReconnectSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Content="Auto-reconnect: " Checked="AutoReconnectSwitch_Checked" Unchecked="AutoReconnectSwitch_Unchecked">
+            <CheckBox x:Name="AutoReconnectSwitch" Style="{StaticResource SwitchStyle}" Margin="2,1,2,1" Foreground="#FFc58901" Content="Auto-reconnect: " Checked="AutoReconnectSwitch_Checked" Unchecked="AutoReconnectSwitch_Unchecked">
                 <CheckBox.ToolTip>
                     <TextBlock>Reconnect after a few minutes and start the last script.</TextBlock>
                 </CheckBox.ToolTip>
