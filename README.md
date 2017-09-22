@@ -1,6 +1,9 @@
 # PROShine
 
 A free, open-source and advanced bot for Pokémon Revolution Online.
+Moddifyed heavily from the original.
+Change log to come. . .
+
 
 Community: https://proshine-bot.com/
 
@@ -14,7 +17,7 @@ Scripts: https://github.com/Silv3rPRO/proshine-scripts
 ## Credits
 
 * Main icon: [shiftercat on DeviantArt](https://shiftercat.deviantart.com/)
-* Other icons: [Font Awesome](http://fontawesome.io/icons/)
+* Other icons: [MahApps](http://mahapps.com/)
 
 ## Contributors
 
