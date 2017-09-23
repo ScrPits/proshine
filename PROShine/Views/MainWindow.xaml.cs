@@ -73,6 +73,12 @@ namespace PROShine
             Bot.TextboxRemoved += Bot_TextboxRemoved;
             
             InitializeComponent();
+
+            // Load settings
+            Bot.AutoReconnector.IsEnabled = Properties.Settings.Default.AutoReconnect;
+            Bot.StaffAvoider.IsEnabled = Properties.Settings.Default.StaffAvoider;
+            Bot.PokemonEvolver.IsEnabled = Properties.Settings.Default.AutoEvolve;
+
             AutoReconnectSwitch.IsChecked = Bot.AutoReconnector.IsEnabled;
             AvoidStaffSwitch.IsChecked = Bot.StaffAvoider.IsEnabled;
             AutoEvolveSwitch.IsChecked = Bot.PokemonEvolver.IsEnabled;
@@ -873,6 +879,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.PokemonEvolver.IsEnabled = true;
+                Properties.Settings.Default.AutoEvolve = true;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -881,6 +889,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.PokemonEvolver.IsEnabled = false;
+                Properties.Settings.Default.AutoEvolve = false;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -889,6 +899,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.StaffAvoider.IsEnabled = true;
+                Properties.Settings.Default.StaffAvoider = true;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -897,6 +909,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.StaffAvoider.IsEnabled = false;
+                Properties.Settings.Default.StaffAvoider = false;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -905,6 +919,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.AutoReconnector.IsEnabled = true;
+                Properties.Settings.Default.AutoReconnect = true;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -913,6 +929,8 @@ namespace PROShine
             lock (Bot)
             {
                 Bot.AutoReconnector.IsEnabled = false;
+                Properties.Settings.Default.AutoReconnect = false;
+                Properties.Settings.Default.Save();
             }
         }
 
