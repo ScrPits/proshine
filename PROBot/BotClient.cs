@@ -224,6 +224,9 @@ namespace PROBot
 
         public void Stop()
         {
+            if (Game != null)
+                Game.ClearPath();
+            
             if (Running != State.Stopped)
             {
                 Running = State.Stopped;
