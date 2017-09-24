@@ -66,6 +66,7 @@
     <Compile Include="ShopItem.cs" />
     <Compile Include="StatType.cs" />
     <Compile Include="Timeout.cs" />
+    <Compile Include="TradePokemon.cs" />
     <Compile Include="TypesManager.cs" />
     <Compile Include="XorEncryption.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
