@@ -1,10 +1,10 @@
-# PROShine
+# PROShine - pulled old featrues in broken. it wont run.
 
 A free, open-source and advanced bot for Pokémon Revolution Online.
 
-Community: https://proshine-bot.com/
+Official Community: https://proshine-bot.com/
 
-Scripts: https://github.com/Silv3rPRO/proshine-scripts
+Sample Scripts: https://github.com/Silv3rPRO/proshine-scripts
 
 ## Libraries
 
